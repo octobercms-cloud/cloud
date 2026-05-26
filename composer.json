@@ -1,6 +1,8 @@
 {
-    "name": "octobercloud/runtime",
+    "name": "octobercloud/cloud",
     "type": "library",
+    "license": "MIT",
+    "keywords": ["octobercms"],
     "require": {
         "illuminate/console": "^10.0 || ^11.0 || ^12.0",
         "illuminate/support": "^10.0 || ^11.0 || ^12.0"
