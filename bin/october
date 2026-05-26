@@ -1,3 +1,79 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-echo "Hello from the october binary!"
+UNAMEOUT="$(uname -s)"
+
+# Verify operating system is supported...
+case "${UNAMEOUT}" in
+    Linux*)             MACHINE=linux;;
+    Darwin*)            MACHINE=mac;;
+    *)                  MACHINE="UNKNOWN"
+esac
+
+if [ "$MACHINE" == "UNKNOWN" ]; then
+    echo "Unsupported operating system [$(uname -s)]. October Cloud supports macOS, Linux, and Windows (WSL2)." >&2
+
+    exit 1
+fi
+
+# Usage screen
+usage() {
+    cat <<EOF
+October Cloud
+
+Usage:
+  october [options] <command> [arguments]
+
+Options:
+  -h, --help     Show this help message
+  -V, --version  Show version information
+
+Commands:
+  help           Show this help message
+
+Run \`october help <command>\` for more information on a command.
+EOF
+}
+
+version() {
+    echo "October Cloud CLI: 0.0.1"
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        -V|--version)
+            version
+            exit 0
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*)
+            echo "october: unknown option: $1" >&2
+            echo "Try 'october --help' for more information." >&2
+            exit 1
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+command="${1:-}"
+shift || true
+
+case "${command}" in
+    ""|help)
+        usage
+        ;;
+    *)
+        echo "october: unknown command: ${command}" >&2
+        echo "Try 'october --help' for more information." >&2
+        exit 1
+        ;;
+esac
