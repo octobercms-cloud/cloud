@@ -1,0 +1,12 @@
+.git
+.gitignore
+compose.yaml
+.env
+.env.*
+!.env.example
+october/.env
+october/storage/logs/*
+october/storage/framework/cache/*
+october/storage/framework/sessions/*
+october/storage/framework/views/*
+october/storage/temp/*
