@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Ensure php-cs-fixer runs from the workspace root so it can read ./composer.json.
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT_DIR"
+
+exec "$ROOT_DIR/vendor/bin/php-cs-fixer" "$@"
+
