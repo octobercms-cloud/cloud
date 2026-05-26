@@ -9,7 +9,7 @@ This project is currently under heavy development, you may want to check back la
 For those who are brave, run the following.
 
 ```bash
-composer require laravel/sail --dev
+composer require octobercloud/cloud --dev
 
 php artisan cloud:install
 ```
