@@ -3,7 +3,7 @@
 namespace OctoberCloud\Runtime;
 
 use Illuminate\Support\ServiceProvider;
-use OctoberCloud\Runtime\Console\CloudInstallCommand;
+use OctoberCloud\Runtime\Console\InstallCommand;
 
 class CloudServiceProvider extends ServiceProvider
 {
@@ -14,7 +14,7 @@ class CloudServiceProvider extends ServiceProvider
         }
 
         $this->commands([
-            CloudInstallCommand::class,
+            InstallCommand::class,
         ]);
     }
 }

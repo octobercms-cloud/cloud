@@ -4,7 +4,7 @@ namespace OctoberCloud\Runtime\Console;
 
 use Illuminate\Console\Command;
 
-class CloudInstallCommand extends Command
+class InstallCommand extends Command
 {
     protected $signature = 'cloud:install';
 
@@ -12,8 +12,6 @@ class CloudInstallCommand extends Command
 
     public function handle(): int
     {
-        $this->info('October Cloud runtime installed (package discovered successfully).');
-
         return self::SUCCESS;
     }
 }
