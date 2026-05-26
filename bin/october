@@ -30,9 +30,103 @@ Options:
 
 Commands:
   help           Show this help message
+  up             Start services defined in compose.yaml
+  down           Stop and remove services defined in compose.yaml
 
 Run \`october help <command>\` for more information on a command.
 EOF
+}
+
+october_bin() {
+    local source="${BASH_SOURCE[0]}"
+
+    while [[ -L "${source}" ]]; do
+        local dir
+        dir="$(cd "$(dirname "${source}")" && pwd)"
+        source="$(readlink "${source}")"
+        [[ "${source}" != /* ]] && source="${dir}/${source}"
+    done
+
+    echo "$(cd "$(dirname "${source}")" && pwd)/$(basename "${source}")"
+}
+
+october_home() {
+    dirname "$(dirname "$(october_bin)")"
+}
+
+resolve_compose_file() {
+    local candidate dir home
+
+    if [[ -n "${OCTOBER_COMPOSE_FILE:-}" ]]; then
+        if [[ -f "${OCTOBER_COMPOSE_FILE}" ]]; then
+            echo "${OCTOBER_COMPOSE_FILE}"
+            return 0
+        fi
+
+        echo "october: compose file not found: ${OCTOBER_COMPOSE_FILE}" >&2
+        return 1
+    fi
+
+    dir="${PWD}"
+    while true; do
+        candidate="${dir}/compose.yaml"
+        if [[ -f "${candidate}" ]]; then
+            echo "${candidate}"
+            return 0
+        fi
+
+        if [[ "${dir}" == "/" ]]; then
+            break
+        fi
+
+        dir="$(dirname "${dir}")"
+    done
+
+    home="$(october_home)"
+    candidate="${home}/compose.yaml"
+    if [[ -f "${candidate}" ]]; then
+        echo "${candidate}"
+        return 0
+    fi
+
+    echo "october: compose file not found." >&2
+    echo "Looked for compose.yaml in the current directory, parent directories, and:" >&2
+    echo "  ${candidate}" >&2
+    echo "Set OCTOBER_COMPOSE_FILE to use a custom path." >&2
+    return 1
+}
+
+COMPOSE_FILE_PATH=""
+COMPOSE_PROJECT_DIRECTORY=""
+
+init_compose() {
+    COMPOSE_FILE_PATH="$(resolve_compose_file)"
+    COMPOSE_PROJECT_DIRECTORY="$(cd "$(dirname "${COMPOSE_FILE_PATH}")" && pwd)"
+}
+
+compose() {
+    if [[ -z "${COMPOSE_FILE_PATH}" ]]; then
+        init_compose
+    fi
+
+    if docker compose version >/dev/null 2>&1; then
+        docker compose -f "${COMPOSE_FILE_PATH}" --project-directory "${COMPOSE_PROJECT_DIRECTORY}" "$@"
+    elif command -v docker-compose >/dev/null 2>&1; then
+        docker-compose -f "${COMPOSE_FILE_PATH}" --project-directory "${COMPOSE_PROJECT_DIRECTORY}" "$@"
+    else
+        echo "october: docker compose is not available (install Docker Compose v2 or docker-compose)." >&2
+        exit 1
+    fi
+}
+
+cmd_up() {
+    init_compose
+    compose up -d "$@"
+}
+
+cmd_down() {
+    init_compose
+    compose down "$@"
 }
 
 version() {
@@ -70,6 +164,12 @@ shift || true
 case "${command}" in
     ""|help)
         usage
+        ;;
+    up)
+        cmd_up "$@"
+        ;;
+    down)
+        cmd_down "$@"
         ;;
     *)
         echo "october: unknown command: ${command}" >&2
