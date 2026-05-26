@@ -1,5 +1,6 @@
 {
     "name": "octobercloud/cloud",
+    "bin": ["bin/october"],
     "type": "library",
     "license": "MIT",
     "keywords": ["octobercms"],
